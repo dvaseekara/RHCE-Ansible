@@ -9,11 +9,11 @@
 ### Formatting an Ansible Playbook
 
 * consider the below snipped and how it can be rewritten as a play
-'''
+```
 ansible -m user -a "name=newbie uid=4000 state=present" servera.lab.example.com
-'''
+```
 
-'''
+```
 ---
 - name: Configure important user consistently
   hosts: servera.lab.example.com
@@ -23,7 +23,7 @@ ansible -m user -a "name=newbie uid=4000 state=present" servera.lab.example.com
 	    name: newbie
 		uid: 4000
 		state: present
-'''
+```
 
 * A playbook is a text file in YAML format (.yml)
 * A Playbook begins with a **---** and may end with **---** as an EOF marker (Optional)
