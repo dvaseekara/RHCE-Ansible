@@ -54,14 +54,31 @@ ansible-playbook site.yml
 * A dry run will report what changes would have occured if the playbook were executed
 
 
-
-
-
-
-
-
-
-
-
 ## Implementing Multiple Plays
+* Writing a playbook that contains multiple plays is very straightforward
+* Each play in th eplaybook is written as a top-level list item in the playbook
+
+### Remote Users and Privilege Escalation in Plays
+* Plays can use different remote users or privilege escalation settings for a play than what is specified by the defaults in teh config file.  These can be set in th eplay itself
+#### User Attributes
+* When a play is run on a managed host, the user account used for task executions is based on setting in the ansible.cfg file.
+* The *remote_user* keyword defines which user will run the task
+* If privilege e3sclation is enabled, other keywords such as *become_user* can also have an impact
+* A *remote_user* keyword can be added within a play to override the *remote_user* described in the *ansible.cfg* file
+#### Privilege Escalation Attributes
+* The *become* boolean keyword can be used to enable or disable privilege escalation
+* If privilege escalation is enabled, the *become_method* can be used to define the privilege escalation method (ex. sudo)
+* With privilege escalation enabled, the *become_user* keyword can define the user account to use
+
+### Finding Modules for Tasks
+#### Module Documentation
+* http://docs.ansible.com
+* **ansible-doc -l** command can be used to list modules from a control node
+* **ansible-doc [module name]** can be used to display detailed documentation for a module
+* **-s** can be used to see an example of how to use th emodule in a playbook
+#### Module Maintenance
+* Ansible ships with modules and has an active upstream community
+* the ansible-doc command can be used to see the status of different modules
+* The *status* and *supported_by* fields recrd the development status and who maintains th emodule
+
 
