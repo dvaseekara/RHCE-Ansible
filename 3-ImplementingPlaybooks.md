@@ -1,6 +1,6 @@
 # Chapter 3 - Implementing Playbooks
 
-## Writing and Runnig Playbooks
+## Writing and Running Playbooks
 
 ### Ansible Playbooks and Ad Hoc Commands
 * Ad Hoc commands can run sigle commands against a host but the real power of Ansible is running cmplex tasks using playbooks
