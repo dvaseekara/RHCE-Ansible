@@ -143,6 +143,7 @@ Example:  Restarting httpd by evaluating the result of the Get Postfix server st
       when: result.rc == 04
 ```
 
+
 ## Implementing Handlers
 * Handlers enables certain tasks to only run when another task changes the managed host
 ### Ansible Handlers
@@ -178,5 +179,139 @@ handlers:
 * Even if more than one task notifies a handler, the handler only runs once
 * If a task that includes a *notify* statement does not report a *changed* result, the handler is not notified
 
+
+
 ## Handling Task Failure
+What happends when a task fails and what conditions cause a task to fail
+
+### Managing Task Errors in Plays
+* Ansible evaluates the return code of each task to determine wheter the task succeeded or failed.
+* Normally, when a task fails Ansible immediately aborsts the rest of teh play on that host
+* Exceptions can be made using a number of Ansible features that can be used to manage task errors
+
+#### Ignoring Task Failure
+* Using **ignore_errors** set to **yes** will allow the playbook to continue even if the task fails
+```
+- name: Latest version of notapkg is installed
+  yum:
+    name: notapkg
+    state: latest
+  ignore_errors: yes
+```
+
+#### Forcing Execution of Handlers after Task Failure
+* Normally, handlers notified by earlier tasks are note executed if a task fails.
+* Use the **force_handlers:  yes** keyword to force handlers to execute regardless of task status
+```
+---
+- hosts: all
+  force_handlers: yes
+  tasks:
+    - name: a task which always notifies its handler
+      command: /bin/true
+      notify: restart the database
+
+    - name: a task which fails because the package doesn't exist
+      yum:
+        name: notapkg
+        state: latest
+
+  handlers:
+    - name: restart the database
+      service:
+        name: mariadb
+        state: restarted
+```
+
+#### Specifying Task Failure Conditions
+* You can use the **failed_when** keyword on a task to specify which conditions indicate that the task has failed.
+```
+tasks:
+  - name: Run user creation script
+    shell: /usr/local/bin/create_users.sh
+    register: command_result
+    failed_when: "'Password missing' in command_result.stdout"
+```
+* The **fail** module can also be used to force a task failure
+```
+tasks:
+  - name: Run user creation script
+    shell: /usr/local/bin/create_users.sh
+    register: command_result
+    ignore_errors: yes
+
+  - name: Report script failure
+    fail:
+      msg: "The password is missing in the output"
+    when: "'Password missing' in command_result.stdout"
+```
+#### Specifying When a Task Reports "Changed" Results
+* The **changed_when** keyword can be used to control when a task reports that it has changed.
+```
+  - name: get Kerberos credentials as "admin"
+    shell: echo "{{ krb_admin_pass }}" | kinit -f admin
+    changed_when: false
+```
+```
+tasks:
+  - shell:
+      cmd: /usr/local/bin/upgrade-database
+    register: command_result
+    changed_when: "'Success' in command_result.stdout"
+    notify:
+      - restart_database
+
+handlers:
+  - name: restart_database
+     service:
+       name: mariadb
+       state: restarted
+```
+
+#### Ansible Blocks and Error Handling
+* **blocks** are clauses that logically group tasks and can be used to control how tasks are executed. 
+* The below example shows blocking tasks to adhere to one **when** statement
+```
+- name: block example
+  hosts: all
+  tasks:
+    - name: installing and configuring Yum versionlock plugin 
+      block:
+      - name: package needed by yum
+        yum:
+          name: yum-plugin-versionlock
+          state: present
+      - name: lock version of tzdata
+        lineinfile:
+          dest: /etc/yum/pluginconf.d/versionlock.list
+          line: tzdata-2016j-1
+          state: present
+      when: ansible_distribution == "RedHat"
+```
+
+* Blocks also allow for error handling in combination with the rescue and always statements. If any task in a block fails, tasks in its rescue block are executed in order to recover. After the tasks in the block clause run, as well as the tasks in the rescue clause if there was a failure, then tasks in the always clause run. 
+* To summarize:
+  * **block**: Defines the main tasks to run.
+
+  * **rescue**: Defines the tasks to run if the tasks defined in the block clause fail.
+
+  * **always**: Defines the tasks that will always run independently of the success or failure of tasks defined in the block and rescue clauses. 
+
+```
+  tasks:
+    - name: Upgrade DB
+      block:
+        - name: upgrade the database
+          shell:
+            cmd: /usr/local/lib/upgrade-database
+      rescue:
+        - name: revert the database upgrade
+          shell:
+            cmd: /usr/local/lib/revert-database
+      always:
+        - name: always restart the database
+          service:
+            name: mariadb
+            state: restarted
+```
 
