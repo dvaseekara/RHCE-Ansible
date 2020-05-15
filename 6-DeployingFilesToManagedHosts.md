@@ -1,9 +1,6 @@
 # Chapter 6 - Deploying Files to Managed Hosts
 
 ## Modifying and Copying Files to Hosts
-
-
-## Deploying Custom Files with Jinja2 Templates
 ### Describing Files Modules
 * The *Files* modules library includes tasks realted to most Linux file management functions.
 |**Module Name**	|**Module Description|
@@ -120,7 +117,124 @@
 
 * Again use **ansible-doc** to get more details on how each of the above tools work
 
+## Deploying Custom Files with Jinja2 Templates
+### Templating Files
+* Ansible allows editing of file usintg *lineinfile* and *blockinfile* but using templats is much more effective
 
+### Intro to Jinja2
+* Ansible uses the Jinja2 templating system for template files.
+* Jinja2 two syntax can be used reference variables in playbooks too
+
+#### Using Delimiters
+* Jinja2 uses {% EXPR %} for expressions or logic suchs as loops and {{ EXPR }} for variables
+* {# COMMENT #} can be used to enclose comments that shouldn't appear in the final file
+
+### Building a Jinja2 template
+* A Jinja2 template can consist of variables, facts, and expressions that will be rendered. Variables can be specified in teh vars section of the playbook 
+* Example:
+```
+# {{ ansible_managed }}
+# DO NOT MAKE LOCAL MODIFICATIONS TO THIS FILE AS THEY WILL BE LOST
+
+Port {{ ssh_port }}
+ListenAddress {{ ansible_facts['default_ipv4']['address'] }}
+
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+SyslogFacility AUTHPRIV
+
+PermitRootLogin {{ root_allowed }}
+AllowGroups {{ groups_allowed }}
+
+AuthorizedKeysFile /etc/.rht_authorized_keys .ssh/authorized_keys
+
+PasswordAuthentication {{ passwords_allowed }}
+
+ChallengeResponseAuthentication no
+
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials no
+
+UsePAM yes
+
+X11Forwarding yes
+UsePrivilegeSeparation sandbox
+
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+AcceptEnv XMODIFIERS
+
+Subsystem sftp	/usr/libexec/openssh/sftp-server
+```
+
+### Deploying Jinja2 Templates
+* The *template* module can be used to deploy Jinja2 Templates
+* The *src* key specifies the source jinja2 tempalte and the *dest* key specifies where the file will be created
+
+```
+tasks:
+  - name: template render
+    template:
+      src: /tmp/j2-template.j2
+      dest: /tmp/dest-config-file.txt
+```
+
+### Managing Templated Files
+* Its good practice to use *ansible_managed* to indicate that a file is managed by a jinja2 template and shouldn't be manually updated
+
+### Control Structures
+#### Using Loops
+```
+{% for user in users %}
+	{{ user }}
+{% endfor % }
+```
+```
+{# for statement #}
+{% for myuser in users if not myuser == "root" %}
+User number {{ loop.index }} - {{ myuser }}
+{% endfor %}
+```
+```
+{% for myhost in groups['myhosts'] %}
+{{ myhost }}
+{% endfor %}
+```
+
+#### Using Conditionals
+*  In the following example, the value of the result variable is placed in the deployed file only if the value of the finished variable is True. 
+```
+{% if finished %}
+{{ result }}
+{% endif %}
+```
+
+### Variable Filters
+* Jinja2 provides filters which change the output format for template expressions.
+* Filters are available for languages such as YAML and JSON
+
+```
+{{ output | to_json }}
+{{ outout | to_yaml }}
+
+{{ output | to_nice_json }}
+{{ output | to_nice_yaml }}
+
+{{ output | from_json }}
+{{ output | from_yaml }}
+```
+
+### Variable Tests
+ The expressions used with when clauses in Ansible Playbooks are Jinja2 expressions. Built-in Ansible tests used to test return values include failed, changed, succeeded, and skipped. The following task shows how tests can be used inside of conditional expressions.
+```
+tasks:
+...output omitted...
+  - debug: msg="the execution was aborted"
+    when: returnvalue is failed
+```
 
 
 
