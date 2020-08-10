@@ -1,5 +1,5 @@
 # Chapter 7 - Managing Large Projects
-[TOC]
+
 ## Selecting Hosts with Host Patterns
 
 ### Referencing Inventory Hosts
