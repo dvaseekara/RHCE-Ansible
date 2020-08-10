@@ -1,4 +1,5 @@
 # Chapter 7 - Managing Large Projects
+[[_TOC_]]
 
 ## Selecting Hosts with Host Patterns
 
