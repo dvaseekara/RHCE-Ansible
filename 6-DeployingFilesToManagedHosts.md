@@ -4,7 +4,7 @@
 ### Describing Files Modules
 * The *Files* modules library includes tasks realted to most Linux file management functions.
 | **Module Name**	| **Module Description** |
-|-----------------------|-------------------------|
+| --------------------- | ---------------------- |
 | blockinfile		| Insert, update, or remove a block of multiline text surrounded by customizable marker lines |
 | copy				| Copy a file from the local or remote machine to a location on a managed host |
 | fetch				| Works like copy but in reverse.  Fetches files from remote machines to the control node |
