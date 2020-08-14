@@ -86,6 +86,7 @@ user.example/
 
 ### Red Hat Enterprise System Roles
 * RHEL 7.4 and newer versions provided the following roles as part ot the *rhel-system-roles8 package
+
 |**Name**|**State**|**Role Description**|
 |rhel-system-roles.kdump|Fully Supported|configures the kdump crash recovery services|
 |rhel-system-roles.network|Fully Supported|Configures network interfaces|
