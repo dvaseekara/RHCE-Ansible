@@ -110,10 +110,73 @@ yum install rhel-system-roles
 * Each roles' documentation directory contains a *README.md* file with describes the role
 * Documentation for upstream roles can be found at (https://galaxy.ansible.com)
 
-### Time synchronization Role Example
+### Role Examples:
+* For brevity, I'm not going to describe these examples.  The *ReadMe* files in the role directory are more than enough.
+* Role can be found in the `/usr/share/doc/rhel-system-roles/timesync` directory
 
-### Selinux Role Example
 
 ## Creating Roles
 
+### The Role Creation Process
+1. Create the role directory structure
+2. Define the role content
+3. use the role in a playbook
+
+### Creating the Role Directory Structure
+* By default ansible looks for roles in a subdirectory called `roles` in the directory containingyour Ansible Playbook
+* If Ansible cannot find the role there, it looks at the directories specified by the Ansible configuration setting `roles_path`
+```
+~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+```
+* This allows playbooks to share roles on your system
+* Checkout the directory structure for roles above
+#### Creating a role Skeleton
+* The **ansible-galaxy** tool is used to manage Ansible roles, includint the creation of new roles
+```
+ansible-galaxy init my_new_role
+ansible machine go brrrr
+```
+### Defining the Role Content
+* A good place to start with role content is the `ROLENAME/tasks/main.yml`
+#### Recommended Practices for Role Content Development
+* Maintain each role in its own git repo
+* Keep sensitive variables out of the role variables/playbooks - Ansible-vault it
+* Use **ansible-galaxy init** to start the role.  Remove any directories you don't need!
+* Create and maintain the README.md and meta/main.yml files you lazy fuck
+* Keep your role focused on a specific purpose or function
+* Reuse and refactor roles often.  Resist creating new roles for edge configs.
+
+### Defining Role Dependencies
+* Role dependencies allow for inclusion of other roles to a role as dependencies.
+* Dependencies are defined in meta/main.yml
+```
+---
+dependencies:
+- role: apache
+  port: 8080
+- role: postgres
+  dbname: serverlist
+  admin_user: felix
+```
+### Using the Role in a Playbook
+* To access a role from a playbook use `roles:`
+```
+---
+- name: Playbook to show roles
+  hosts: all
+  become: true
+  remote_user: devops
+  roles:
+  - motd
+```
+* This scenario assumes that the motd role is in the `role` subdirectory in the same directory as the playbook
+
+### Changing a Role's Behavior with Variables
+* A well-written role will have default variables that can be manipulated to run different configurations of the role
+* Default role varialbes can be overwritten by:
+	1. an inventory file, either as a host variable or a group variable
+	2. in a YAML file under the group_vars or host_vars directory of a playbook project
+	3. as a variable nested in the *vars* keyword of a play
+	4. as a variable when including the role in *roles* keyword of a play
+	
 ## Deploying Roels with Ansible Galaxy
