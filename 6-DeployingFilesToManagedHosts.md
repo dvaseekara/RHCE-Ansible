@@ -3,10 +3,7 @@
 ## Modifying and Copying Files to Hosts
 ### Describing Files Modules
 * The *Files* modules library includes tasks realted to most Linux file management functions.
-| Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph   | Text        |
+
 
 | **Module Name**	| **Module Description** |
 | --------------------- | ---------------------- |
