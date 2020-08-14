@@ -142,7 +142,7 @@ ansible machine go brrrr
 * Maintain each role in its own git repo
 * Keep sensitive variables out of the role variables/playbooks - Ansible-vault it
 * Use **ansible-galaxy init** to start the role.  Remove any directories you don't need!
-* Create and maintain the README.md and meta/main.yml files you lazy fuck
+* Create and maintain the README.md and meta/main.yml files you lazy dog
 * Keep your role focused on a specific purpose or function
 * Reuse and refactor roles often.  Resist creating new roles for edge configs.
 
@@ -179,4 +179,43 @@ dependencies:
 	3. as a variable nested in the *vars* keyword of a play
 	4. as a variable when including the role in *roles* keyword of a play
 	
-## Deploying Roels with Ansible Galaxy
+## Deploying Roles with Ansible Galaxy
+### Introducing Ansible Galaxy
+* Public library of Ansible content written by a variety of Ansible administrators and users.
+* It has a GUI, you go figure it out.
+### Ansible Galaxy command Line Tool
+* Can be used to search for, display information about, install, list, remove, or initialize roles!
+```
+ansible-galaxy search
+# can filter by --author, --playform, --galaxy-tags
+
+ansible-galaxy info
+```
+#### Installing Roles
+```
+ansible-galaxy install
+```
+*  By default roles will be installed to the first option in your *roles_path* or by env var *ANSIBLE_ROLES_PATH*
+*  You can use the -p option to install it in a different directory
+*  you can define roles needed for a playbook in a requirements.yml file and have ansible-galaxy install all the roles listed there:
+*  you can even point to roles from a private repo
+```
+- src: geerlingguy.redis
+  version: "1.5.0"
+  
+- src: https://gitlab.com/guardianproject-ops/ansible-nginx-acme.git
+  scm: git
+  version: 56e00a54
+  name: nginx-acme
+```
+* Simply run:
+```
+ansible-galaxy install -r roles/requirements.yml -p roles
+```
+#### Managing Downloaded Roles
+```
+ansible-galaxy list
+ansible-galaxy remove nginx-acme-ssh
+```
+
+
